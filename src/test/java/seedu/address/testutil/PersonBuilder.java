@@ -1,6 +1,7 @@
 package seedu.address.testutil;
 import java.util.HashSet;
 import java.util.Set;
+
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
@@ -25,6 +26,9 @@ public class PersonBuilder {
     private Address address;
     private Remark remark;
     private Set<Tag> tags;
+    /**
+     * Initializes the PersonBuilder with the data of {@code personToCopy}.
+     */
     public PersonBuilder() {
         name = new Name(DEFAULT_NAME);
         phone = new Phone(DEFAULT_PHONE);
