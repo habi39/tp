@@ -1,6 +1,6 @@
 package seedu.address.model.task;
 
-import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,24 +18,26 @@ public class Task {
     // Identity fields
     private final Title title;
     private final Deadline deadline;
-    private final Email email;
     private final StartTime starttime;
 
     // Data fields
     private final Description description;
+    private final RecurringSchedule recurringSchedule;
+    private final Status status;
     private final Set<Tag> tags = new HashSet<>();
 
     /**
-     * Every field must be present and not null.
+     * Title field must be present and not null.
      */
-    public Task(Title title, Deadline deadline, StartTime starttime, Email email,
-                Description description, Set<Tag> tags) {
-        requireAllNonNull(title, deadline, starttime, email, description, tags);
+    public Task(Title title, Deadline deadline, StartTime starttime, RecurringSchedule recurringSchedule,
+                Description description, Status status, Set<Tag> tags) {
+        requireNonNull(title);
         this.title = title;
         this.deadline = deadline;
         this.starttime = starttime;
-        this.email = email;
+        this.recurringSchedule = recurringSchedule;
         this.description = description;
+        this.status = status;
         this.tags.addAll(tags);
     }
 
@@ -51,12 +53,16 @@ public class Task {
         return starttime;
     }
 
-    public Email getEmail() {
-        return email;
+    public RecurringSchedule getRecurringSchedule() {
+        return recurringSchedule;
     }
 
     public Description getDescription() {
         return description;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 
     /**
@@ -98,29 +104,32 @@ public class Task {
         return otherTask.getTitle().equals(getTitle())
                 && otherTask.getDeadline().equals(getDeadline())
                 && otherTask.getStartTime().equals(getStartTime())
-                && otherTask.getEmail().equals(getEmail())
+                && otherTask.getRecurringSchedule().equals(getRecurringSchedule())
                 && otherTask.getDescription().equals(getDescription())
+                && otherTask.getStatus().equals(getStatus())
                 && otherTask.getTags().equals(getTags());
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(title, deadline, starttime, email, description, tags);
+        return Objects.hash(title, deadline, starttime, recurringSchedule, description, status, tags);
     }
 
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         builder.append(getTitle())
-                .append("; Deadline: ")
+                .append("; \nDeadline: ")
                 .append(getDeadline())
-                .append("; StartTime: ")
+                .append("; \nStartTime: ")
                 .append(getStartTime())
-                .append("; Email: ")
-                .append(getEmail())
-                .append("; Description: ")
-                .append(getDescription());
+                .append("; \nRecurringSchedule: ")
+                .append(getRecurringSchedule())
+                .append("; \nDescription: ")
+                .append(getDescription())
+                .append("; \nStatus: ")
+                .append(getStatus());
 
         Set<Tag> tags = getTags();
         if (!tags.isEmpty()) {

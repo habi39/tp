@@ -3,7 +3,7 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_DEADLINE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_DESCRIPTION;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_RECURRINGSCHEDULE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_STARTTIME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TITLE;
@@ -23,8 +23,9 @@ import seedu.address.model.Model;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.task.Deadline;
 import seedu.address.model.task.Description;
-import seedu.address.model.task.Email;
+import seedu.address.model.task.RecurringSchedule;
 import seedu.address.model.task.StartTime;
+import seedu.address.model.task.Status;
 import seedu.address.model.task.Task;
 import seedu.address.model.task.Title;
 
@@ -42,12 +43,19 @@ public class EditCommand extends Command {
             + "[" + PREFIX_TITLE + "TITLE] "
             + "[" + PREFIX_DEADLINE + "DEADLINE] "
             + "[" + PREFIX_STARTTIME + "15:30] "
-            + "[" + PREFIX_EMAIL + "EMAIL] "
+            + "[" + PREFIX_RECURRINGSCHEDULE + "RECURRINGSCHEDULE] "
             + "[" + PREFIX_DESCRIPTION + "DESCRIPTION] "
             + "[" + PREFIX_TAG + "TAG]...\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_DEADLINE + "91234567 "
-            + PREFIX_EMAIL + "johndoe@example.com";
+            + PREFIX_RECURRINGSCHEDULE + "[10 Mar 2021][Mon][weekly]";
+
+    public static final String SHORT_MESSAGE_USAGE = COMMAND_WORD
+            + "[" + PREFIX_TITLE + "TITLE] "
+            + "[" + PREFIX_DEADLINE + "DEADLINE] "
+            + "[" + PREFIX_STARTTIME + "15:30] "
+            + "[" + PREFIX_DESCRIPTION + "DESCRIPTION] "
+            + "[" + PREFIX_TAG + "TAG]\n";
 
     public static final String MESSAGE_EDIT_TASK_SUCCESS = "Edited Task: %1$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
@@ -73,14 +81,18 @@ public class EditCommand extends Command {
         requireNonNull(model);
         List<Task> lastShownList = model.getFilteredTaskList();
 
-        if (index.getZeroBased() >= lastShownList.size()) {
+        int indexValue = index.getZeroBased();
+        boolean isValidIndex = indexValue >= lastShownList.size();
+
+        if (isValidIndex) {
             throw new CommandException(Messages.MESSAGE_INVALID_TASK_DISPLAYED_INDEX);
         }
 
-        Task taskToEdit = lastShownList.get(index.getZeroBased());
+        Task taskToEdit = lastShownList.get(indexValue);
         Task editedTask = createEditedTask(taskToEdit, editTaskDescriptor);
 
-        if (!taskToEdit.isSameTask(editedTask) && model.hasTask(editedTask)) {
+        boolean isDuplicateTask = !taskToEdit.isSameTask(editedTask) && model.hasTask(editedTask);
+        if (isDuplicateTask) {
             throw new CommandException(MESSAGE_DUPLICATE_TASK);
         }
 
@@ -99,11 +111,14 @@ public class EditCommand extends Command {
         Title updatedTitle = editTaskDescriptor.getTitle().orElse(taskToEdit.getTitle());
         Deadline updatedDeadline = editTaskDescriptor.getDeadline().orElse(taskToEdit.getDeadline());
         StartTime updatedStartTime = editTaskDescriptor.getStartTime().orElse(taskToEdit.getStartTime());
-        Email updatedEmail = editTaskDescriptor.getEmail().orElse(taskToEdit.getEmail());
+        RecurringSchedule updatedRecurringSchedule = editTaskDescriptor.getRecurringSchedule()
+                .orElse(taskToEdit.getRecurringSchedule());
         Description updatedDescription = editTaskDescriptor.getDescription().orElse(taskToEdit.getDescription());
+        Status updatedStatus = editTaskDescriptor.getStatus().orElse(taskToEdit.getStatus());
         Set<Tag> updatedTags = editTaskDescriptor.getTags().orElse(taskToEdit.getTags());
 
-        return new Task(updatedTitle, updatedDeadline, updatedStartTime, updatedEmail, updatedDescription, updatedTags);
+        return new Task(updatedTitle, updatedDeadline, updatedStartTime, updatedRecurringSchedule, updatedDescription,
+                updatedStatus, updatedTags);
     }
 
     @Override
@@ -132,8 +147,9 @@ public class EditCommand extends Command {
         private Title title;
         private Deadline deadline;
         private StartTime starttime;
-        private Email email;
+        private RecurringSchedule recurringSchedule;
         private Description description;
+        private Status status;
         private Set<Tag> tags;
 
         public EditTaskDescriptor() {}
@@ -146,8 +162,9 @@ public class EditCommand extends Command {
             setTitle(toCopy.title);
             setDeadline(toCopy.deadline);
             setStartTime(toCopy.starttime);
-            setEmail(toCopy.email);
+            setRecurringSchedule(toCopy.recurringSchedule);
             setDescription(toCopy.description);
+            setStatus(toCopy.status);
             setTags(toCopy.tags);
         }
 
@@ -155,7 +172,8 @@ public class EditCommand extends Command {
          * Returns true if at least one field is edited.
          */
         public boolean isAnyFieldEdited() {
-            return CollectionUtil.isAnyNonNull(title, deadline, starttime, email, description, tags);
+            return CollectionUtil.isAnyNonNull(title, deadline, starttime, recurringSchedule,
+                    description, status, tags);
         }
 
         public void setTitle(Title title) {
@@ -182,12 +200,12 @@ public class EditCommand extends Command {
             return Optional.ofNullable(starttime);
         }
 
-        public void setEmail(Email email) {
-            this.email = email;
+        public void setRecurringSchedule(RecurringSchedule recurringSchedule) {
+            this.recurringSchedule = recurringSchedule;
         }
 
-        public Optional<Email> getEmail() {
-            return Optional.ofNullable(email);
+        public Optional<RecurringSchedule> getRecurringSchedule() {
+            return Optional.ofNullable(recurringSchedule);
         }
 
         public void setDescription(Description description) {
@@ -196,6 +214,14 @@ public class EditCommand extends Command {
 
         public Optional<Description> getDescription() {
             return Optional.ofNullable(description);
+        }
+
+        public void setStatus(Status status) {
+            this.status = status;
+        }
+
+        public Optional<Status> getStatus() {
+            return Optional.ofNullable(status);
         }
 
         /**
@@ -232,8 +258,9 @@ public class EditCommand extends Command {
 
             return getTitle().equals(e.getTitle())
                     && getDeadline().equals(e.getDeadline())
-                    && getEmail().equals(e.getEmail())
+                    && getRecurringSchedule().equals(e.getRecurringSchedule())
                     && getDescription().equals(e.getDescription())
+                    && getStatus().equals(e.getStatus())
                     && getTags().equals(e.getTags());
         }
     }

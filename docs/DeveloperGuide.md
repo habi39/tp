@@ -51,7 +51,7 @@ For example, the `Logic` component (see the class diagram given below) defines i
 
 **How the architecture components interact with each other**
 
-The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete 1`.
+The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete-task 1`.
 
 <img src="images/ArchitectureSequenceDiagram.png" width="574" />
 
@@ -86,11 +86,11 @@ The `UI` component,
 1. The result of the command execution is encapsulated as a `CommandResult` object which is passed back to the `Ui`.
 1. In addition, the `CommandResult` object can also instruct the `Ui` to perform certain actions, such as displaying help to the user.
 
-Given below is the Sequence Diagram for interactions within the `Logic` component for the `execute("delete 1")` API call.
+Given below is the Sequence Diagram for interactions within the `Logic` component for the `execute("delete-task 1")` API call.
 
-![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
+![Interactions Inside the Logic Component for the `delete-task 1` Command](images/DeleteSequenceDiagram.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.
+<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteTaskCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.
 </div>
 
 ### Model component
@@ -106,12 +106,10 @@ The `Model`,
 * exposes an unmodifiable `ObservableList<Task>` that can be 'observed' e.g. the UI can be bound to this list so that the UI automatically updates when the data in the list change.
 * does not depend on any of the other three components.
 
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** An alternative (arguably, a more OOP) model is given below. It has a `Tag` list in the `Planner`, which `Task` references. This allows `Planner` to only require one `Tag` object per unique `Tag`, instead of each `Task` needing their own `Tag` object.<br>
-![BetterModelClassDiagram](images/BetterModelClassDiagram.png)
-
+<div markdown="span" class="alert alert-info">:information_source:**Note:** An alternative (arguably, a more OOP) model is given below. It has a `Tag` list in the `Planner`, which `Task` references. This allows `Planner` to only require one `Tag` object per unique `Tag`, instead of each `Task` needing their own `Tag` object.<br>
 </div>
 
+![BetterModelClassDiagram](images/BetterModelClassDiagram.png)
 
 ### Storage component
 
@@ -151,7 +149,7 @@ Step 1. The user launches the application for the first time. The `VersionedAddr
 
 ![UndoRedoState0](images/UndoRedoState0.png)
 
-Step 2. The user executes `delete 5` command to delete the 5th task in the address book. The `delete` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete 5` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
+Step 2. The user executes `delete-task 5` command to delete the 5th task in the address book. The `delete-task` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete-task 5` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
 
 ![UndoRedoState1](images/UndoRedoState1.png)
 
@@ -177,7 +175,6 @@ The following sequence diagram shows how the undo operation works:
 ![UndoSequenceDiagram](images/UndoSequenceDiagram.png)
 
 <div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `UndoCommand` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.
-
 </div>
 
 The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
@@ -208,14 +205,21 @@ The following activity diagram summarizes what happens when a user executes a ne
 
 * **Alternative 2:** Individual command knows how to undo/redo by
   itself.
-  * Pros: Will use less memory (e.g. for `delete`, just save the task being deleted).
+  * Pros: Will use less memory (e.g. for `delete-task`, just save the task being deleted).
   * Cons: We must ensure that the implementation of each individual command are correct.
 
 _{more aspects and alternatives to be added}_
 
-### \[Proposed\] Data archiving
+### Mark task as done
 
-_{Explain here how the data archiving feature will be implemented}_
+A task has a Status attribute which can be marked as done, using the Done command.
+
+  * The Status attribute is a data field belonging to Task, and only has 2 valid values: 'done' and 'not done'.
+  * The doneCommand only takes in a single parameter, INDEX, which must be a valid positive integer.
+
+The following activity diagram illustrates how a user might utilise this feature:
+
+![DoneCommandActivityDiagram](images/DoneCommandActivityDiagram.png)
 
 
 --------------------------------------------------------------------------------------------------------------------
@@ -259,13 +263,18 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 | Priority | As a …​ | I want to …​ | So that I can…​ |
 | -------- | ---------- | --------------- | ------------------ |
-| `* * *`  | new user | see usage instructions | refer to instructions when I forget how to use the App |
-| `* * *`  | user | add a new deadline | know when to complete it by |
+| `* * *`  | new user | see usage instructions | refer to instructions when I forget how to use the App  |
+| `* * *`  | user | add a deadline to a task | know when to complete it by |
 | `* * *`  | user | mark a task as done | remove tasks from the list after completing them |
 | `* * *`  | user | view when a task is due | understand how much time I have to complete it |
 | `* * *`  | returning user | view all the tasks previously set | avoid resetting all the tasks |
-| `* * *`  | user | search for a task using keywords | find matching tasks quickly |
+| `* * *`  | user | search using keywords from the task title | find matching tasks quickly when I only can remember the title|
+| `* * *`  | user | search using keywords from the tag(s) of task|  find matching tasks from the same category quickly when I only can remember the tag(s).|
+| `* * *`  | user | search using keywords from the task description | find matching tasks quickly when I only can remember the description |
 | `* * *`  | user | view all my tasks in a list | track tasks I have not done |
+| `* * *`  | user | delete tasks from the list | reduce clutter or remove a mistakenly added task |
+| `* * *`  | user | delete specific fields from a task in the list | manage the details in a task |
+
 
 *{Updated for v1.2}*
 
@@ -273,35 +282,34 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 (For all use cases below, the **System** is the `PlanIT` and the **Actor** is the `user`, unless specified otherwise)
 
-**Use case: Adding a task**
+#### **Use case: Adding a task**
 
 **MSS**
 
 1. User enters command to add a task to the list.
 2. PlanIT shows the resulting list after adding task to it.
-    
+
     Use case ends.
 
 **Extensions**
 * 1a. PlanIT detects a command of the wrong format.
-  
     * 1a1. PlanIT requests for user to input command in correct format.
     * 1a2. User enters command in correct format.
-    
+
     Steps 1a1-1a2 are repeated until the data entered is correct.
-    
+
     Use case resumes from step 2.
 
-**Use case: Viewing all possible commands**
+#### **Use case: Viewing all possible commands**
 
 **MSS**
 
 1. User enters command to view all possible commands.
-2. PlanIT displays all possible commands to user.  
+2. PlanIT displays all possible commands to user.
 
    Use case ends.
 
-**Use case: Viewing all tasks**
+#### **Use case: Viewing all tasks**
 
 **MSS**
 
@@ -313,12 +321,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **Extensions**
 
 * 1a. PlanIT detects a command to view only uncompleted tasks.
-    
+
     * 1a1. PlanIT displays only uncompleted tasks.
-    
+
     Use case ends.
 
-**Use case: Add a deadline to a task**
+#### **Use case: Add a deadline to a task**
 
 **MSS**
 1. User _adds a task_ to the list.
@@ -329,10 +337,10 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **Extensions**
 * 4a. The given index is invalid.
     * 4a1. PlanIt shows error message.
-    
+
         Use case resumes at step 3.
 
-**Use case: Delete a task**
+#### **Use case: Delete a task**
 
 **MSS**
 1. User _adds a task_ to the list.
@@ -346,7 +354,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 3.
 
-**Use case: Find matching tasks**
+#### **Use case: Find matching tasks**
 
 **MSS**
 1. User _adds a task_ to the list.
@@ -359,22 +367,37 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
     * 4a1. PlanIt shows no matching tasks.
 
       Use case ends.
-    
+
+#### **Use case: Mark task as done**
+
+**MSS**
+1. User _adds a task_ to the list.
+2. PlanIt shows task added to the list and updates list.
+3. User enters command to mark a task as done.
+4. PlanIt updates Task in the model with Status updated to 'done'.
+5. PlanIt displays doneCommand success message.
+
+**Extensions**
+* 3a. The task selected already has a Status: 'done'
+    * 4a1. PlanIt displays task already done message.
+
+      Use case ends.
+
 
 ### Non-Functional Requirements
 
 Non-functional requirements specify the constraints under which the system for PlanIT is developed and operated.
 
 #### Technical requirements:
-* The system should be compatible on mainstream OS, with only version Java 11 
-  (no other version) installed.
-* The system should work on both 32-bit and 64-bit environments.  
+* The system should be compatible on mainstream OS, with only version Java 11
+(no other version) installed.
+* The system should work on both 32-bit and 64-bit environments.
 
 #### Performance requirements:
 * The system should be loaded up within 2 seconds or less.
 * The User Interface should be responsive to user input and loaded up within 2 seconds.
 * The system should be able to handle 1,000 or more task data entries without noticeable sluggishness
-  in performance for typical usage.
+in performance for typical usage.
 
 #### Usability requirements:
 * The user should have a keyboard and well-verse in typing alphanumeric keys on the keyboard.
@@ -387,8 +410,8 @@ Non-functional requirements specify the constraints under which the system for P
 
 #### Data requirements:
 * The system file size should not exceed 100 MB.
-* The system should save data entered by the user in a human editable file without any use 
-  of external database management system.
+* The system should save data entered by the user in a human editable file without any use
+of external database management system.
 
 #### Project scope:
 * The features within the system is only catered to a single user.
@@ -432,15 +455,15 @@ testers are expected to do more *exploratory* testing.
 
 1. Deleting a task while all tasks are being shown
 
-   1. Prerequisites: List all tasks using the `list` command. Multiple tasks in the list.
+   1. Prerequisites: List all existing tasks using the `list` command. Multiple tasks in the list.
 
-   1. Test case: `delete 1`<br>
+   1. Test case: `delete-task 1`<br>
       Expected: First contact is deleted from the list. Details of the deleted contact shown in the status message. Timestamp in the status bar is updated.
 
-   1. Test case: `delete 0`<br>
+   1. Test case: `delete-task 0`<br>
       Expected: No task is deleted. Error details shown in the status message. Status bar remains the same.
 
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
+   1. Other incorrect delete commands to try: `delete`, `delete-task x`, `...` (where x is larger than the list size)<br>
       Expected: Similar to previous.
 
 1. _{ more test cases …​ }_

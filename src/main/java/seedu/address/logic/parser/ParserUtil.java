@@ -12,8 +12,9 @@ import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.task.Deadline;
 import seedu.address.model.task.Description;
-import seedu.address.model.task.Email;
+import seedu.address.model.task.RecurringSchedule;
 import seedu.address.model.task.StartTime;
+import seedu.address.model.task.Status;
 import seedu.address.model.task.Title;
 
 /**
@@ -97,18 +98,33 @@ public class ParserUtil {
     }
 
     /**
-     * Parses a {@code String email} into an {@code Email}.
+     * Parses a {@code String status} into an {@code Status}.
      * Leading and trailing whitespaces will be trimmed.
      *
-     * @throws ParseException if the given {@code email} is invalid.
+     * @throws ParseException if the given {@code status} is invalid.
      */
-    public static Email parseEmail(String email) throws ParseException {
-        requireNonNull(email);
-        String trimmedEmail = email.trim();
-        if (!Email.isValidEmail(trimmedEmail)) {
-            throw new ParseException(Email.MESSAGE_CONSTRAINTS);
+    public static Status parseStatus(String status) throws ParseException {
+        requireNonNull(status);
+        String trimmedStatus = status.trim();
+        if (!Status.isValidStatus(trimmedStatus)) {
+            throw new ParseException(Status.MESSAGE_CONSTRAINTS);
         }
-        return new Email(trimmedEmail);
+        return new Status(trimmedStatus);
+    }
+
+    /**
+     * Parses a {@code String recurringSchedule} into an {@code RecurringSchedule}.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the given {@code recurringSchedule} is invalid.
+     */
+    public static RecurringSchedule parseRecurringSchedule(String recurringSchedule) throws ParseException {
+        requireNonNull(recurringSchedule);
+        String trimmedRecurringSchedule = recurringSchedule.trim();
+        if (!RecurringSchedule.isValidRecurringScheduleInput(trimmedRecurringSchedule)) {
+            throw new ParseException(RecurringSchedule.MESSAGE_CONSTRAINTS);
+        }
+        return new RecurringSchedule(trimmedRecurringSchedule);
     }
 
     /**

@@ -2,8 +2,9 @@ package seedu.address.testutil;
 
 import static seedu.address.logic.parser.CliSyntax.PREFIX_DEADLINE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_DESCRIPTION;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_RECURRINGSCHEDULE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_STARTTIME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_STATUS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TITLE;
 
@@ -35,8 +36,9 @@ public class TaskUtil {
         sb.append(PREFIX_TITLE + task.getTitle().fullTitle + " ");
         sb.append(PREFIX_DEADLINE + task.getDeadline().value + " ");
         sb.append(PREFIX_STARTTIME + task.getStartTime().value + " ");
-        sb.append(PREFIX_EMAIL + task.getEmail().value + " ");
+        sb.append(PREFIX_RECURRINGSCHEDULE + task.getRecurringSchedule().value + " ");
         sb.append(PREFIX_DESCRIPTION + task.getDescription().value + " ");
+        sb.append(PREFIX_STATUS + task.getStatus().value + " ");
         task.getTags().stream().forEach(s -> sb.append(PREFIX_TAG + s.tagName + " "));
         return sb.toString();
     }
@@ -50,9 +52,11 @@ public class TaskUtil {
         descriptor.getDeadline().ifPresent(deadline -> sb.append(PREFIX_DEADLINE).append(deadline.value).append(" "));
         descriptor.getStartTime().ifPresent(starttime -> sb.append(PREFIX_STARTTIME)
                 .append(starttime.value).append(" "));
-        descriptor.getEmail().ifPresent(email -> sb.append(PREFIX_EMAIL).append(email.value).append(" "));
+        descriptor.getRecurringSchedule().ifPresent(recurringSchedule -> sb.append(PREFIX_RECURRINGSCHEDULE)
+                .append(recurringSchedule.value).append(" "));
         descriptor.getDescription().ifPresent(description ->
                 sb.append(PREFIX_DESCRIPTION).append(description.value).append(" "));
+        descriptor.getStatus().ifPresent(status -> sb.append(PREFIX_STATUS).append(status.value).append(" "));
         if (descriptor.getTags().isPresent()) {
             Set<Tag> tags = descriptor.getTags().get();
             if (tags.isEmpty()) {

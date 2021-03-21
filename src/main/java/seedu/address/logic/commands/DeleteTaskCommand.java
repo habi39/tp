@@ -13,33 +13,40 @@ import seedu.address.model.task.Task;
 /**
  * Deletes a task identified using it's displayed index from the planner.
  */
-public class DeleteCommand extends Command {
+public class DeleteTaskCommand extends Command {
 
-    public static final String COMMAND_WORD = "delete";
+    public static final String COMMAND_WORD = "delete-task";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Deletes the task identified by the index number used in the displayed task list.\n"
             + "Parameters: INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 1";
 
+    public static final String SHORT_MESSAGE_USAGE = COMMAND_WORD + "INDEX (must be a positive integer)\n";
+
     public static final String MESSAGE_DELETE_TASK_SUCCESS = "Deleted Task: %1$s";
 
     private final Index targetIndex;
 
-    public DeleteCommand(Index targetIndex) {
+    //@@author mesyeux
+    public DeleteTaskCommand(Index targetIndex) {
         this.targetIndex = targetIndex;
     }
+    //@@author
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         List<Task> lastShownList = model.getFilteredTaskList();
 
-        if (targetIndex.getZeroBased() >= lastShownList.size()) {
+        int targetIndexValue = targetIndex.getZeroBased();
+        boolean isValidIndex = targetIndexValue >= lastShownList.size();
+
+        if (isValidIndex) {
             throw new CommandException(Messages.MESSAGE_INVALID_TASK_DISPLAYED_INDEX);
         }
 
-        Task taskToDelete = lastShownList.get(targetIndex.getZeroBased());
+        Task taskToDelete = lastShownList.get(targetIndexValue);
         model.deleteTask(taskToDelete);
         return new CommandResult(String.format(MESSAGE_DELETE_TASK_SUCCESS, taskToDelete));
     }
@@ -47,7 +54,9 @@ public class DeleteCommand extends Command {
     @Override
     public boolean equals(Object other) {
         return other == this // short circuit if same object
-                || (other instanceof DeleteCommand // instanceof handles nulls
-                && targetIndex.equals(((DeleteCommand) other).targetIndex)); // state check
+                //@@author mesyeux
+                || (other instanceof DeleteTaskCommand // instanceof handles nulls
+                && targetIndex.equals(((DeleteTaskCommand) other).targetIndex)); // state check
+                //@@author
     }
 }

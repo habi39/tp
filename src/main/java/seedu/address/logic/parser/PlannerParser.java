@@ -9,7 +9,9 @@ import java.util.regex.Pattern;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
-import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.logic.commands.DeleteFieldCommand;
+import seedu.address.logic.commands.DeleteTaskCommand;
+import seedu.address.logic.commands.DoneCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
@@ -36,7 +38,8 @@ public class PlannerParser {
      */
     public Command parseCommand(String userInput) throws ParseException {
         final Matcher matcher = BASIC_COMMAND_FORMAT.matcher(userInput.trim());
-        if (!matcher.matches()) {
+        boolean isInvalidFormat = !matcher.matches();
+        if (isInvalidFormat) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, HelpCommand.MESSAGE_USAGE));
         }
 
@@ -50,8 +53,13 @@ public class PlannerParser {
         case EditCommand.COMMAND_WORD:
             return new EditCommandParser().parse(arguments);
 
-        case DeleteCommand.COMMAND_WORD:
-            return new DeleteCommandParser().parse(arguments);
+        //@@author mesyeux
+        case DeleteTaskCommand.COMMAND_WORD:
+            return new DeleteTaskCommandParser().parse(arguments);
+
+        case DeleteFieldCommand.COMMAND_WORD:
+            return new DeleteFieldCommandParser().parse(arguments);
+        //@@author
 
         case ClearCommand.COMMAND_WORD:
             return new ClearCommand();
@@ -67,6 +75,9 @@ public class PlannerParser {
 
         case HelpCommand.COMMAND_WORD:
             return new HelpCommand();
+
+        case DoneCommand.COMMAND_WORD:
+            return new DoneCommandParser().parse(arguments);
 
         default:
             throw new ParseException(MESSAGE_UNKNOWN_COMMAND);

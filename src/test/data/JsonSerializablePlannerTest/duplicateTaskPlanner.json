@@ -3,14 +3,16 @@
     "title": "Alice Pauline",
     "deadline": "13/05/1998",
     "starttime": "1230",
-    "email": "alice@example.com",
+    "recurringSchedule": "[08 Mar 2021][Tue][weekly]",
     "description": "123, Jurong West Ave 6, #08-111",
+    "status": "done",
     "tagged": [ "friends" ]
   }, {
     "title": "Alice Pauline",
     "deadline": "13/05/1998",
     "starttime": "1230",
-    "email": "pauline@example.com",
-    "description": "4th street"
+    "recurringSchedule": "[08 Mar 2021][Tue][weekly]",
+    "description": "4th street",
+    "status": "done"
   } ]
 }
